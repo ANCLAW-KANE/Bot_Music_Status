@@ -3,13 +3,9 @@ from vk_api.bot_longpoll import VkBotEventType , VkBotLongPoll
 import time , sqlite3 , re
 from  threading import Thread
 
-#def captcha_handler(captcha):
-#    key = input("Enter captcha code {0}: ".format(captcha.get_url())).strip()
-#    return captcha.try_again(key)
-
-vk_session: VkApi = vk_api.VkApi(token="18ae9b6d3a66e7d5d1ca36aca453ebffb02de8449c71f871aa1bf6faff7a021eed9416b3e867c1bafe8c3")
+vk_session: VkApi = vk_api.VkApi(token="")
 vk = vk_session.get_api()
-longpoll = VkBotLongPoll(vk_session,206973016)
+longpoll = VkBotLongPoll(vk_session,#id_группы)
 
 def get_audio():
     BD = sqlite3.connect('audio.db')
@@ -52,7 +48,7 @@ def set_audio():
                     vk_audio = Vk.get_api()
                     vk_audio.audio.setBroadcast(audio=data[2])
                 except:
-                    vk.messages.send(random_id=0, message=f"Невалидная запись:\n {data}", peer_id=388145277)
+                    vk.messages.send(random_id=0, message=f"Невалидная запись:\n {data}", peer_id=#peer_id)
         time.sleep(1)
 
 if __name__ == '__main__':
