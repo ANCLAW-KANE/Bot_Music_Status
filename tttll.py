@@ -3,9 +3,13 @@ from vk_api.bot_longpoll import VkBotEventType , VkBotLongPoll
 import time , sqlite3 , re
 from  threading import Thread
 
-vk_session: VkApi = vk_api.VkApi(token="")
+#def captcha_handler(captcha):
+#    key = input("Enter captcha code {0}: ".format(captcha.get_url())).strip()
+#    return captcha.try_again(key)
+
+vk_session: VkApi = vk_api.VkApi(token="18ae9b6d3a66e7d5d1ca36aca453ebffb02de8449c71f871aa1bf6faff7a021eed9416b3e867c1bafe8c3")
 vk = vk_session.get_api()
-longpoll = VkBotLongPoll(vk_session,#id_группы)
+longpoll = VkBotLongPoll(vk_session,206973016)
 
 def get_audio():
     BD = sqlite3.connect('audio.db')
@@ -32,6 +36,23 @@ def get_audio():
                 if TEXT == "/мой токен":
                     token = edit.execute("SELECT token FROM users where userid = ?",(event.object.message['peer_id'],))
                     vk.messages.send(random_id=0,message=token,peer_id = event.object.message['peer_id'])
+                if TEXT == "/delete":
+                    edit.execute("DELETE FROM users where userid = ?", (event.object.message['peer_id'],))
+                    BD.commit()
+                if TEXT == '/help':
+                    vk.messages.send(random_id=0, message=f"Команды автостатуса:\n /set-audio токен + ваше аудиовложение\n"
+                                                          f"пример: \n/set-audio 1aae9b6d....7c1сafe821\n"
+                                                          f"Токен можете взять с сайта >> https://vkhost.github.io/ << \n"
+                                                          f"Выберите *Настройки* , в верхней части *Пользователь*\n"
+                                                          f"Выберите опции *Статус*, *Доступ в любое время*\n"
+                                                          f"И нажмите *Получить* в самом внизу , после на новой странце "
+                                                          f"*Разрешить* \nИ в адресной строке скопируйте ключ как с примера (ваш будет другой )"
+                                                          f"после access_token= до &expires\n\n"
+                                                          f"/мой токен\n"
+                                                          f"Команда работает только в лс и гапоминает ваш токен\n"
+                                                          f"Удобно при смене аудио, так как не нужно брать новый\n\n"
+                                                          f"/delete\n"
+                                                          f"Удаляет вас из базы автостатуса", peer_id=event.object.message['peer_id'])
 
 def set_audio():
     timing = time.time()
@@ -48,13 +69,14 @@ def set_audio():
                     vk_audio = Vk.get_api()
                     vk_audio.audio.setBroadcast(audio=data[2])
                 except:
-                    vk.messages.send(random_id=0, message=f"Невалидная запись:\n {data}", peer_id=#peer_id)
+                    vk.messages.send(random_id=0, message=f"Невалидная запись:\n {data}", peer_id=388145277)
         time.sleep(1)
 
-if __name__ == '__main__':
-    Get = Thread(target=get_audio,args=())
-    Get.start()
-    SetA = Thread(target=set_audio, args=())
-    SetA.start()
-    if not Get.join(): exit()
-    if not SetA.join(): exit()
+
+Get = Thread(target=get_audio,args=())
+Get.start()
+SetA = Thread(target=set_audio, args=())
+SetA.start()
+
+
+
