@@ -3,10 +3,6 @@ from vk_api.bot_longpoll import VkBotEventType , VkBotLongPoll
 import time , sqlite3 , re
 from  threading import Thread
 
-#def captcha_handler(captcha):
-#    key = input("Enter captcha code {0}: ".format(captcha.get_url())).strip()
-#    return captcha.try_again(key)
-
 vk_session: VkApi = vk_api.VkApi(token="")
 vk = vk_session.get_api()
 longpoll = VkBotLongPoll(vk_session,)
