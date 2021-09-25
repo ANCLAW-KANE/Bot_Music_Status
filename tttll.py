@@ -1,4 +1,4 @@
-from vk_api import VkApi, vk_api
+﻿from vk_api import VkApi, vk_api
 from vk_api.bot_longpoll import VkBotEventType , VkBotLongPoll
 import time , sqlite3 , re
 from  threading import Thread
@@ -56,7 +56,8 @@ def get_audio():
                                                           f"Команда работает только в лс и гапоминает ваш токен\n"
                                                           f"Удобно при смене аудио, так как не нужно брать новый\n\n"
                                                           f"/delete\n"
-                                                          f"Удаляет вас из базы автостатуса", peer_id=event.object.message['peer_id'])
+                                                          f"Удаляет вас из базы автостатуса\n\n",
+							  f"/restart\n Перезагрузка, если установка аудио не срабатывает"peer_id=event.object.message['peer_id'])
 
 def set_audio():
     global triggerCode
