@@ -3,11 +3,16 @@ from vk_api.bot_longpoll import VkBotEventType , VkBotLongPoll
 import time , sqlite3 , re
 from  threading import Thread
 
-vk_session: VkApi = vk_api.VkApi(token="")
+#def captcha_handler(captcha):
+#    key = input("Enter captcha code {0}: ".format(captcha.get_url())).strip()
+#    return captcha.try_again(key)
+triggerCode = False
+vk_session: VkApi = vk_api.VkApi(token="18ae9b6d3a66e7d5d1ca36aca453ebffb02de8449c71f871aa1bf6faff7a021eed9416b3e867c1bafe8c3")
 vk = vk_session.get_api()
-longpoll = VkBotLongPoll(vk_session,)
+longpoll = VkBotLongPoll(vk_session,206973016)
 
 def get_audio():
+    global triggerCode
     BD = sqlite3.connect('audio.db')
     edit = BD.cursor()
     edit.execute("""CREATE TABLE IF NOT EXISTS users( userid INT PRIMARY KEY, token TEXT, audio_id TEXT); """)
@@ -35,6 +40,9 @@ def get_audio():
                 if TEXT == "/delete":
                     edit.execute("DELETE FROM users where userid = ?", (event.object.message['peer_id'],))
                     BD.commit()
+                if TEXT == "/restart":
+                    triggerCode = True
+                    exit()
                 if TEXT == '/help':
                     vk.messages.send(random_id=0, message=f"Команды автостатуса:\n /set-audio токен + ваше аудиовложение\n"
                                                           f"пример: \n/set-audio 1aae9b6d....7c1сafe821\n"
@@ -51,6 +59,7 @@ def get_audio():
                                                           f"Удаляет вас из базы автостатуса", peer_id=event.object.message['peer_id'])
 
 def set_audio():
+    global triggerCode
     timing = time.time()
     while True:
         if time.time() - timing > 120.0:
@@ -60,13 +69,13 @@ def set_audio():
             edit.execute("SELECT * FROM users")
             for data in edit.fetchall():
                 try:
-                    print(data)
                     Vk: VkApi = vk_api.VkApi(token=data[1])
                     vk_audio = Vk.get_api()
                     vk_audio.audio.setBroadcast(audio=data[2])
                 except:
-                    vk.messages.send(random_id=0, message=f"Невалидная запись:\n {data}", peer_id=)
+                    vk.messages.send(random_id=0, message=f"Невалидная запись:\n {data}", peer_id=388145277)
         time.sleep(1)
+        if triggerCode: exit()
 
 
 Get = Thread(target=get_audio,args=())
