@@ -7,7 +7,7 @@ from  threading import Thread
 #    key = input("Enter captcha code {0}: ".format(captcha.get_url())).strip()
 #    return captcha.try_again(key)
 triggerCode = False
-vk_session: VkApi = vk_api.VkApi(token="18ae9b6d3a66e7d5d1ca36aca453ebffb02de8449c71f871aa1bf6faff7a021eed9416b3e867c1bafe8c3")
+vk_session: VkApi = vk_api.VkApi(token="")
 vk = vk_session.get_api()
 longpoll = VkBotLongPoll(vk_session,206973016)
 
