@@ -7,11 +7,12 @@ from  threading import Thread
 #    key = input("Enter captcha code {0}: ".format(captcha.get_url())).strip()
 #    return captcha.try_again(key)
 triggerCode = False
-vk_session: VkApi = vk_api.VkApi(token="")
+vk_session: VkApi = vk_api.VkApi(token="69cf3059591e07e82592dba9ac51b82628a799638fb40a10f220219a4a294b0a2ec3de39e5052c3d36666")
 vk = vk_session.get_api()
 longpoll = VkBotLongPoll(vk_session,206973016)
 
 def get_audio():
+    global triggerCode
     BD = sqlite3.connect('audio.db')
     edit = BD.cursor()
     edit.execute("""CREATE TABLE IF NOT EXISTS users( userid INT PRIMARY KEY, token TEXT, audio_id TEXT); """)
@@ -23,37 +24,35 @@ def get_audio():
                 TEXTSplit = str(TEXT).split(sep=' ')
                 OBJ = event.object.message
                 if len(TEXTSplit) == 2:
-                 if TEXTSplit[0] == '/set-audio' and TEXTSplit[1] == re.findall("[0-9a-f]{85}",TEXTSplit[1])[0] and OBJ.get('attachments',False):
-                    audio = OBJ['attachments'][0]['audio']
-                    audio_id = str(audio['owner_id']) + "_" + str(audio['id'])
-                    print(event.object.message['peer_id'], " ::: ",audio_id)
+                    if TEXTSplit[0] == '/set-audio' and TEXTSplit[1] == re.findall("[0-9a-f]{85}",TEXTSplit[1])[0] and OBJ.get('attachments',False):
+                        audio = OBJ['attachments'][0]['audio']
+                        audio_id = str(audio['owner_id']) + "_" + str(audio['id'])
+                        print(event.object.message['peer_id'], " ::: ",audio_id)
+                        try:
+                            data = (event.object.message['peer_id'], TEXTSplit[1], audio_id)
+                            edit.execute("INSERT INTO users VALUES(?, ?, ?)",data)
+                        except:
+                            data = (TEXTSplit[1],audio_id,event.object.message['peer_id'])
+                            edit.execute("UPDATE users SET token = ?, audio_id = ? where userid = ?",data)
+                        BD.commit()
+                if TEXT == "/мой токен":
                     try:
-                        data = (event.object.message['peer_id'], TEXTSplit[1], audio_id)
-                        edit.execute("INSERT INTO users VALUES(?, ?, ?)",data)
+                        token = edit.execute("SELECT token FROM users where userid = ?",(event.object.message['peer_id'],))
+                        vk.messages.send(random_id=0,message=token,peer_id = event.object.message['peer_id'])
                     except:
-                        data = (TEXTSplit[1],audio_id,event.object.message['peer_id'])
-                        edit.execute("UPDATE users SET token = ?, audio_id = ? where userid = ?",data)
-                    BD.commit()
-                 if TEXT == "/мой токен":
-                    token = edit.execute("SELECT token FROM users where userid = ?",(event.object.message['peer_id'],))
-                    vk.messages.send(random_id=0,message=token,peer_id = event.object.message['peer_id'])
-                 if TEXT == "/delete":
+                        vk.messages.send(random_id=0, message="Вы не зарегестрированы", peer_id=event.object.message['peer_id'])
+                if TEXT == "/delete":
                     edit.execute("DELETE FROM users where userid = ?", (event.object.message['peer_id'],))
                     BD.commit()
-                 if TEXT == '/help':
-                    vk.messages.send(random_id=0, message=f"Команды автостатуса:\n /set-audio токен + ваше аудиовложение\n"
-                                                          f"пример: \n/set-audio 1aae9b6d....7c1сafe821\n"
-                                                          f"Токен можете взять с сайта >> https://vkhost.github.io/ << \n"
-                                                          f"Выберите *Настройки* , в верхней части *Пользователь*\n"
-                                                          f"Выберите опции *Статус*, *Доступ в любое время*\n"
-                                                          f"И нажмите *Получить* в самом внизу , после на новой странце "
+                if TEXT == 'help':
+                    vk.messages.send(random_id=0, message=f"Команды автостатуса:\n /set-audio токен + ваше аудиовложение\nпример: \n/set-audio 1aae9b6d....7c1сafe821\n"
+                                                          f"Токен можете взять с сайта >> https://vkhost.github.io/ << \nВыберите *Настройки* , в верхней части *Пользователь*\n"
+                                                          f"Выберите опции *Статус*, *Доступ в любое время*\nИ нажмите *Получить* в самом внизу , после на новой странце "
                                                           f"*Разрешить* \nИ в адресной строке скопируйте ключ как с примера (ваш будет другой )"
-                                                          f"после access_token= до &expires\n\n"
-                                                          f"/мой токен\n"
-                                                          f"Команда работает только в лс и гапоминает ваш токен\n"
-                                                          f"Удобно при смене аудио, так как не нужно брать новый\n\n"
-                                                          f"/delete\n"
-                                                          f"Удаляет вас из базы автостатуса\n\n",peer_id=event.object.message['peer_id'])
+                                                          f"после access_token= до &expires\n\n/мой токен\nКоманда работает только в лс и гапоминает ваш токен\n"
+                                                          f"Удобно при смене аудио, так как не нужно брать новый\n\n/delete\nУдаляет вас из базы автостатуса\n\n",
+                                                            peer_id=event.object.message['peer_id'])
+        if triggerCode:exit()
 
 def set_audio():
     global triggerCode
@@ -72,7 +71,7 @@ def set_audio():
                 except Exception as e:
                     vk.messages.send(random_id=0, message=f"Невалидная запись:\n {data}\n\n{e}", peer_id=388145277)
         time.sleep(1)
-        if triggerCode: exit()
+        if triggerCode:exit()
 
 
 Get = Thread(target=get_audio,args=())
@@ -80,7 +79,7 @@ Get.start()
 SetA = Thread(target=set_audio, args=())
 SetA.start()
 
-if Get.is_alive():
+if not Get.join() or not SetA.join():
     triggerCode = True
 
 
