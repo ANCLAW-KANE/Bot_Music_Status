@@ -7,9 +7,19 @@ from  threading import Thread
 #    key = input("Enter captcha code {0}: ".format(captcha.get_url())).strip()
 #    return captcha.try_again(key)
 triggerCode = False
-vk_session: VkApi = vk_api.VkApi(token="")
+vk_session: VkApi = vk_api.VkApi(token="69cf3059591e07e82592dba9ac51b82628a799638fb40a10f220219a4a294b0a2ec3de39e5052c3d36666")
 vk = vk_session.get_api()
 longpoll = VkBotLongPoll(vk_session,206973016)
+
+def getUserName(obj):  # извлечение имени и фамилии
+    try:
+        userId = int(obj)
+        if 0 < userId < 2000000000:
+            username = vk.users.get(user_id=userId)
+            user = str(username[0]['first_name'] + " " + username[0]['last_name'])
+            return user
+    except:
+        pass
 
 def get_audio():
     global triggerCode
@@ -69,7 +79,20 @@ def set_audio():
                     vk_audio = Vk.get_api()
                     vk_audio.audio.setBroadcast(audio=data[2])
                 except Exception as e:
-                    vk.messages.send(random_id=0, message=f"Невалидная запись:\n {data}\n\n{e}", peer_id=388145277)
+                    e = str(e).split(sep=' ')[0]
+                    error = {
+                        '[5]': (f"{getUserName(data[0]) } ! Неверный токен: {data[1]}\n Удаляю его из базы",int(data[0]),
+                                f"DELETE FROM users where userid = {data[0]}"),
+                        '[3610]': (f"Страница {getUserName(data[0]) } удалена.\n Уничтожаю аккаунт {data[0]} из базы.",388145277,
+                                   f"DELETE FROM users where userid = {data[0]}"),
+                        '[10]':(f"Сбой сервера вк, неуспешная проверка токена для {getUserName(data[0])}. ID = {data[0]} ",388145277,''),
+                    }
+                    if e in error:
+                        msg = error.get(e)
+                        vk.messages.send(random_id=0, message=msg[0],  peer_id=msg[1])
+                        edit.execute(msg[2])
+                        BD.commit()
+                    else: vk.messages.send(random_id=0,message=f"Невалидная запись:\n {data[0]} - {getUserName(data[0])}\n\n{e}",peer_id=388145277)
         time.sleep(1)
         if triggerCode:exit()
 
