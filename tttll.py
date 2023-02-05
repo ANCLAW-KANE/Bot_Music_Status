@@ -34,7 +34,7 @@ def get_audio():
                 TEXTSplit = str(TEXT).split(sep=' ')
                 OBJ = event.object.message
                 if len(TEXTSplit) == 2:
-                    if TEXTSplit[0] == '/set-audio' and TEXTSplit[1] == re.findall("[0-9a-f]{85}",TEXTSplit[1])[0] and OBJ.get('attachments',False):
+                    if TEXTSplit[0] == '/set-audio' and TEXTSplit[1] == re.findall("[vka-zA-Z0-9.a-zA-Z0-9.a-zA-Z0-9_-]{220}",TEXTSplit[1])[0] and OBJ.get('attachments',False):
                         audio = OBJ['attachments'][0]['audio']
                         audio_id = str(audio['owner_id']) + "_" + str(audio['id'])
                         print(event.object.message['peer_id'], " ::: ",audio_id)
